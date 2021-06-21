@@ -1,29 +1,34 @@
 
-Respo workflow in Calcit-js
+Touch Control
 ----
 
-> Respo web page based on [calcit-js](https://github.com/calcit-lang/calcit_runner.rs).
+> for Quatrefoil [calcit-js](https://github.com/calcit-lang/calcit_runner.rs). This lib targets Chrome mobile.
 
-Demo http://repo.calcit-lang.org/respo-calcit-workflow/ .
+Demo http://repo.quamolit.org/touch-control/ .
 
 ### Usages
 
-To develop:
+Import via calcit:
 
-```bash
-calcit_runner --emit-js # watching
+```cirru
+; "renders to body"
+touch-control.core/render-control!
 
-yarn # to install vite
-yarn vite # watching and running on localhost:3000
+; "where you can get states"
+println touch-control.core/*control-states
 ```
 
-calcit-js is using [Calcit Editor](https://github.com/Cirru/calcit-editor).
+States:
 
-To build:
+```cirru
+:left-move $ [] 0 0
+:right-move $ [] 0 0
 
-```bash
-yarn vite build
-http-server dist/
+:left-a? false
+:left-b? false
+
+:right-a? false
+:right-b? false
 ```
 
 ### Workflow

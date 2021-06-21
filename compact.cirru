@@ -1,61 +1,43 @@
 
-{} (:package |app)
-  :configs $ {} (:init-fn |app.main/main!) (:reload-fn |app.main/reload!)
+{} (:package |touch-control)
+  :configs $ {} (:init-fn |touch-control.app.main/main!) (:reload-fn |touch-control.app.main/reload!)
     :modules $ []
     :version |0.0.1
   :files $ {}
-    |app.config $ {}
-      :ns $ quote (ns app.config)
+    |touch-control.core $ {}
+      :ns $ quote (ns touch-control.core)
       :defs $ {}
-        |dev? $ quote (def dev? true)
-        |site $ quote
-          def site $ {} (:dev-ui "\"http://localhost:8100/main-fonts.css") (:release-ui "\"http://cdn.tiye.me/favored-fonts/main-fonts.css") (:cdn-url "\"http://cdn.tiye.me/calcit-workflow/") (:title "\"Calcit") (:icon "\"http://cdn.tiye.me/logo/mvc-works.png") (:storage-key "\"workflow")
-      :proc $ quote ()
-    |app.main $ {}
-      :ns $ quote
-        ns app.main $ :require
-          respo.core :refer $ render! clear-cache! realize-ssr!
-          app.comp.container :refer $ comp-container
-          app.updater :refer $ updater
-          app.schema :as schema
-          reel.util :refer $ listen-devtools!
-          reel.core :refer $ reel-updater refresh-reel
-          reel.schema :as reel-schema
-          app.config :as config
-      :defs $ {}
-        |main! $ quote
-          defn main! () (load-console-formatter!)
-            println "\"Running mode:" $ if config/dev? "\"dev" "\"release"
-            render-control!
-            println "|App started."
-            add-watch *control-states :change $ fn (s old)
-              set!
-                .-innerText $ js/document.querySelector "\"pre"
-                js/JSON.stringify (to-js-data @*control-states) nil 2
-            .!addEventListener js/window "\"scroll" $ fn (e) (js/console.log "\"scroll" e)
         |render-control! $ quote
-          defn render-control! () $ let
-              panel $ div
-                {} $ :className "\"touch-control"
-                {}
-                div
-                  {} $ :className "\"left-hand hand-button"
-                  , left-events $ div
-                    {} $ :className "\"hand-center"
-                    {}
-                div
-                  {} $ :className "\"right-hand hand-button"
-                  , right-events $ div
-                    {} $ :className "\"hand-center"
-                    {}
-                div
-                  {} $ :className "\"turn circle-button"
-                  connect-state :turn?
-                div
-                  {} $ :className "\"faster circle-button"
-                  connect-state :faster?
-              dom $ render-dom! panel js/document.body
-            reset! *container dom
+          defn render-control! ()
+            if (some? @*container) (.!remove @*container)
+            let
+                panel $ div
+                  {} $ :className "\"touch-control"
+                  {}
+                  div
+                    {} $ :className "\"left-hand hand-button"
+                    , left-events $ div
+                      {} $ :className "\"hand-center"
+                      {}
+                  div
+                    {} $ :className "\"right-hand hand-button"
+                    , right-events $ div
+                      {} $ :className "\"hand-center"
+                      {}
+                  div
+                    {} $ :className "\"left-a circle-button"
+                    connect-state :left-a?
+                  div
+                    {} $ :className "\"left-b circle-button"
+                    connect-state :left-b?
+                  div
+                    {} $ :className "\"right-a circle-button"
+                    connect-state :right-a?
+                  div
+                    {} $ :className "\"right-b circle-button"
+                    connect-state :right-b?
+                dom $ render-dom! panel js/document.body
+              reset! *container dom
         |render-dom! $ quote
           defn render-dom! (el parent)
             let
@@ -73,62 +55,76 @@
         |connect-state $ quote
           defn connect-state (field)
             {}
-              :pointerdown $ fn (event) (js/console.log "\"down" event) (swap! *control-states assoc field true)
-              :pointercancel $ fn (event) (js/console.log "\"cancel" event) (; swap! *control-states assoc field true)
-              :pointerup $ fn (event) (js/console.log "\"up" event) (swap! *control-states assoc field false)
-              :pointerout $ fn (event) (js/console.log "\"out" event) (swap! *control-states assoc field false)
-              ; :pointerleave $ fn (event) (js/console.log "\"leave" event) (swap! *control-states assoc field false)
-              ; :pointerenter $ fn (event) (js/console.log "\"enter" event) (swap! *control-states assoc field true)
-              :pointermove $ fn (event)
-                js/console.log "\"move" $ ; event
-                swap! *control-states assoc field true
-              ; :pointerover $ fn (event) (js/console.log "\"over" event) (swap! *control-states assoc field true)
-              ; :gotpointercapture $ fn (event) (js/console.log "\"got capture" event) (swap! *control-states assoc field true)
-              ; :lostpointercapture $ fn (event) (js/console.log "\"lost capture" event) (swap! *control-states assoc field true)
+              :pointerdown $ fn (event) (; js/console.log "\"down" event) (swap! *control-states assoc field true)
+              :pointerup $ fn (event) (; js/console.log "\"up" event)
+                if (not= js/window.innerHeight js/screen.height) (js/document.documentElement.requestFullscreen)
+                swap! *control-states assoc field false
         |*container $ quote (defatom *container nil)
         |left-events $ quote
           def left-events $ {}
             :pointerdown $ fn (event)
               let
                   move $ []
-                    - (.-layerX event) 120
-                    - 120 $ .-layerY event
-                swap! *control-states assoc :left-coin move
+                    - (.-layerX event) 50
+                    - 50 $ .-layerY event
+                swap! *control-states assoc :left-move move
             :pointerup $ fn (event)
-              swap! *control-states assoc :left-coin $ [] 0 0
+              swap! *control-states assoc :left-move $ [] 0 0
             :pointermove $ fn (event)
               let
                   move $ []
-                    - (.-layerX event) 120
-                    - 120 $ .-layerY event
-                swap! *control-states assoc :left-coin move
+                    - (.-layerX event) 50
+                    - 50 $ .-layerY event
+                swap! *control-states assoc :left-move move
         |div $ quote
           defn div (props events & children)
             %{} %element (:props props) (:events events) (:children children)
-        |reload! $ quote
-          defn reload! () (println "\"reload TODO")
-            if (some? @*container) (.!remove @*container)
-            render-control!
         |*control-states $ quote
-          defatom *control-states $ {} (:turn? false) (:faster? false)
-            :left-coin $ [] 0 0
-            :right-coin $ [] 0 0
+          defatom *control-states $ {} (:left-a? false) (:left-b? false) (:right-a? false) (:right-b? false)
+            :left-move $ [] 0 0
+            :right-move $ [] 0 0
         |right-events $ quote
           def right-events $ {}
             :pointerdown $ fn (event)
               let
                   move $ []
-                    - (.-layerX event) 120
-                    - 120 $ .-layerY event
-                swap! *control-states assoc :right-coin move
+                    - (.-layerX event) 50
+                    - 50 $ .-layerY event
+                swap! *control-states assoc :right-move move
             :pointerup $ fn (event)
-              swap! *control-states assoc :right-coin $ [] 0 0
+              swap! *control-states assoc :right-move $ [] 0 0
             :pointermove $ fn (event)
               let
                   move $ []
-                    - (.-layerX event) 120
-                    - 120 $ .-layerY event
-                swap! *control-states assoc :right-coin move
+                    - (.-layerX event) 50
+                    - 50 $ .-layerY event
+                swap! *control-states assoc :right-move move
+      :proc $ quote ()
+      :configs $ {}
+    |touch-control.app.main $ {}
+      :ns $ quote
+        ns touch-control.app.main $ :require (touch-control.app.config :as config)
+          touch-control.core :refer $ render-control! *control-states
+      :defs $ {}
+        |main! $ quote
+          defn main! () (load-console-formatter!)
+            println "\"Running mode:" $ if config/dev? "\"dev" "\"release"
+            render-control!
+            show-data!
+            add-watch *control-states :change $ fn (s old) (show-data!)
+        |reload! $ quote
+          defn reload! () (println "\"reload TODO") (render-control!)
         |mount-target $ quote
           def mount-target $ .querySelector js/document |.app
+        |show-data! $ quote
+          defn show-data! () $ set!
+            .-innerText $ js/document.querySelector "\"pre"
+            js/JSON.stringify (to-js-data @*control-states) nil 2
+      :proc $ quote ()
+    |touch-control.app.config $ {}
+      :ns $ quote (ns touch-control.app.config)
+      :defs $ {}
+        |dev? $ quote (def dev? true)
+        |site $ quote
+          def site $ {} (:dev-ui "\"http://localhost:8100/main-fonts.css") (:release-ui "\"http://cdn.tiye.me/favored-fonts/main-fonts.css") (:cdn-url "\"http://cdn.tiye.me/calcit-workflow/") (:title "\"Calcit") (:icon "\"http://cdn.tiye.me/logo/mvc-works.png") (:storage-key "\"workflow")
       :proc $ quote ()

@@ -2,7 +2,7 @@
   "name": "Qua Debug",
   "short_name": "Qua Debug",
   "start_url": ".",
-  "display": "fullscreen",
+  "display": "minimal-ui",
   "background_color": "#220011",
   "description": "Debug entry for Quamolit",
   "icons": [{
