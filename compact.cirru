@@ -1,54 +1,12 @@
 
 {} (:package |app)
   :configs $ {} (:init-fn |app.main/main!) (:reload-fn |app.main/reload!)
-    :modules $ [] |respo.calcit/compact.cirru |lilac/compact.cirru |memof/compact.cirru |respo-ui.calcit/compact.cirru |respo-markdown.calcit/compact.cirru |reel.calcit/compact.cirru
+    :modules $ []
     :version |0.0.1
   :files $ {}
-    |app.comp.container $ {}
-      :ns $ quote
-        ns app.comp.container $ :require (respo-ui.core :as ui)
-          respo.core :refer $ defcomp defeffect <> >> div button textarea span input
-          respo.comp.space :refer $ =<
-          reel.comp.reel :refer $ comp-reel
-          respo-md.comp.md :refer $ comp-md
-          app.config :refer $ dev?
-      :defs $ {}
-        |comp-container $ quote
-          defcomp comp-container (reel)
-            let
-                store $ :store reel
-                states $ :states store
-                cursor $ either (:cursor states) ([])
-                state $ either (:data states)
-                  {} $ :content "\""
-              div
-                {} $ :style (merge ui/global ui/row)
-                textarea $ {}
-                  :value $ :content state
-                  :placeholder "\"Content"
-                  :style $ merge ui/expand ui/textarea
-                    {} $ :height 320
-                  :on-input $ fn (e d!)
-                    d! cursor $ assoc state :content (:value e)
-                =< 8 nil
-                div
-                  {} $ :style ui/expand
-                  comp-md "|This is some content with `code`"
-                  =< |8px nil
-                  button $ {} (:style ui/button) (:inner-text "\"Run")
-                    :on-click $ fn (e d!)
-                      println $ :content state
-                when dev? $ comp-reel (>> states :reel) reel ({})
-      :proc $ quote ()
     |app.config $ {}
       :ns $ quote (ns app.config)
       :defs $ {}
-        |cdn? $ quote
-          def cdn? $ cond
-              exists? js/window
-              , false
-            (exists? js/process) (= "\"true" js/process.env.cdn)
-            :else false
         |dev? $ quote (def dev? true)
         |site $ quote
           def site $ {} (:dev-ui "\"http://localhost:8100/main-fonts.css") (:release-ui "\"http://cdn.tiye.me/favored-fonts/main-fonts.css") (:cdn-url "\"http://cdn.tiye.me/calcit-workflow/") (:title "\"Calcit") (:icon "\"http://cdn.tiye.me/logo/mvc-works.png") (:storage-key "\"workflow")
@@ -65,68 +23,112 @@
           reel.schema :as reel-schema
           app.config :as config
       :defs $ {}
-        |ssr? $ quote
-          def ssr? $ some? (js/document.querySelector |meta.respo-ssr)
-        |repeat! $ quote
-          defn repeat! (duration cb)
-            js/setTimeout
-              fn () (cb)
-                repeat! (* 1000 duration) cb
-              * 1000 duration
-        |dispatch! $ quote
-          defn dispatch! (op op-data)
-            when
-              and config/dev? $ not= op :states
-              println "\"Dispatch:" op
-            reset! *reel $ reel-updater updater @*reel op op-data
         |main! $ quote
-          defn main! ()
+          defn main! () (load-console-formatter!)
             println "\"Running mode:" $ if config/dev? "\"dev" "\"release"
-            if ssr? $ render-app! realize-ssr!
-            render-app! render!
-            add-watch *reel :changes $ fn (reel prev) (render-app! render!)
-            listen-devtools! |k dispatch!
-            .addEventListener js/window |beforeunload $ fn (event) (persist-storage!)
-            repeat! 60 persist-storage!
-            let
-                raw $ .!getItem js/localStorage (:storage-key config/site)
-              when (some? raw)
-                dispatch! :hydrate-storage $ extract-cirru-edn (js/JSON.parse raw)
+            render-control!
             println "|App started."
-        |persist-storage! $ quote
-          defn persist-storage! () $ .!setItem js/localStorage (:storage-key config/site)
-            js/JSON.stringify $ to-cirru-edn (:store @*reel)
-        |*reel $ quote
-          defatom *reel $ -> reel-schema/reel (assoc :base schema/store) (assoc :store schema/store)
-        |snippets $ quote
-          defn snippets () $ println config/cdn?
-        |render-app! $ quote
-          defn render-app! (renderer)
-            renderer mount-target (comp-container @*reel) dispatch!
+            add-watch *control-states :change $ fn (s old)
+              set!
+                .-innerText $ js/document.querySelector "\"pre"
+                js/JSON.stringify (to-js-data @*control-states) nil 2
+            .!addEventListener js/window "\"scroll" $ fn (e) (js/console.log "\"scroll" e)
+        |render-control! $ quote
+          defn render-control! () $ let
+              panel $ div
+                {} $ :className "\"touch-control"
+                {}
+                div
+                  {} $ :className "\"left-hand hand-button"
+                  , left-events $ div
+                    {} $ :className "\"hand-center"
+                    {}
+                div
+                  {} $ :className "\"right-hand hand-button"
+                  , right-events $ div
+                    {} $ :className "\"hand-center"
+                    {}
+                div
+                  {} $ :className "\"turn circle-button"
+                  connect-state :turn?
+                div
+                  {} $ :className "\"faster circle-button"
+                  connect-state :faster?
+              dom $ render-dom! panel js/document.body
+            reset! *container dom
+        |render-dom! $ quote
+          defn render-dom! (el parent)
+            let
+                div $ js/document.createElement "\"div"
+                props $ :props el
+                events $ :events el
+                children $ :children el
+              &doseq (pair props)
+                let[] (k v) pair $ aset div (turn-string k) v
+              &doseq (pair events)
+                let[] (k v) pair $ .!addEventListener div (turn-string k) v false
+              &doseq (child children) (render-dom! child div)
+              .!appendChild parent div
+        |%element $ quote (defrecord %element :props :events :children)
+        |connect-state $ quote
+          defn connect-state (field)
+            {}
+              :pointerdown $ fn (event) (js/console.log "\"down" event) (swap! *control-states assoc field true)
+              :pointercancel $ fn (event) (js/console.log "\"cancel" event) (; swap! *control-states assoc field true)
+              :pointerup $ fn (event) (js/console.log "\"up" event) (swap! *control-states assoc field false)
+              :pointerout $ fn (event) (js/console.log "\"out" event) (swap! *control-states assoc field false)
+              ; :pointerleave $ fn (event) (js/console.log "\"leave" event) (swap! *control-states assoc field false)
+              ; :pointerenter $ fn (event) (js/console.log "\"enter" event) (swap! *control-states assoc field true)
+              :pointermove $ fn (event)
+                js/console.log "\"move" $ ; event
+                swap! *control-states assoc field true
+              ; :pointerover $ fn (event) (js/console.log "\"over" event) (swap! *control-states assoc field true)
+              ; :gotpointercapture $ fn (event) (js/console.log "\"got capture" event) (swap! *control-states assoc field true)
+              ; :lostpointercapture $ fn (event) (js/console.log "\"lost capture" event) (swap! *control-states assoc field true)
+        |*container $ quote (defatom *container nil)
+        |left-events $ quote
+          def left-events $ {}
+            :pointerdown $ fn (event)
+              let
+                  move $ []
+                    - (.-layerX event) 120
+                    - 120 $ .-layerY event
+                swap! *control-states assoc :left-coin move
+            :pointerup $ fn (event)
+              swap! *control-states assoc :left-coin $ [] 0 0
+            :pointermove $ fn (event)
+              let
+                  move $ []
+                    - (.-layerX event) 120
+                    - 120 $ .-layerY event
+                swap! *control-states assoc :left-coin move
+        |div $ quote
+          defn div (props events & children)
+            %{} %element (:props props) (:events events) (:children children)
         |reload! $ quote
-          defn reload! () (remove-watch *reel :changes) (clear-cache!)
-            add-watch *reel :changes $ fn (reel prev) (render-app! render!)
-            reset! *reel $ refresh-reel @*reel schema/store updater
+          defn reload! () (println "\"reload TODO")
+            if (some? @*container) (.!remove @*container)
+            render-control!
+        |*control-states $ quote
+          defatom *control-states $ {} (:turn? false) (:faster? false)
+            :left-coin $ [] 0 0
+            :right-coin $ [] 0 0
+        |right-events $ quote
+          def right-events $ {}
+            :pointerdown $ fn (event)
+              let
+                  move $ []
+                    - (.-layerX event) 120
+                    - 120 $ .-layerY event
+                swap! *control-states assoc :right-coin move
+            :pointerup $ fn (event)
+              swap! *control-states assoc :right-coin $ [] 0 0
+            :pointermove $ fn (event)
+              let
+                  move $ []
+                    - (.-layerX event) 120
+                    - 120 $ .-layerY event
+                swap! *control-states assoc :right-coin move
         |mount-target $ quote
           def mount-target $ .querySelector js/document |.app
-      :proc $ quote ()
-    |app.schema $ {}
-      :ns $ quote (ns app.schema)
-      :defs $ {}
-        |store $ quote
-          def store $ {}
-            :states $ {}
-              :cursor $ []
-      :proc $ quote ()
-    |app.updater $ {}
-      :ns $ quote
-        ns app.updater $ :require
-          respo.cursor :refer $ update-states
-      :defs $ {}
-        |updater $ quote
-          defn updater (store op data op-id op-time)
-            case op
-              :states $ update-states store data
-              :hydrate-storage data
-              op store
       :proc $ quote ()

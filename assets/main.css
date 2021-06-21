@@ -1,0 +1,105 @@
+body {
+  margin: 0;
+  overscroll-behavior-y: none;
+  touch-action: none;
+  padding: 40px;
+  color:  gray;
+
+  background-color: black;
+}
+
+body * {
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+pre {
+  color:  gray;
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: hsla(0,0%,100%);
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: hsla(200,100%,76%,0.8);
+}
+
+::-webkit-scrollbar-corner {
+  background-color: transparent;
+}
+
+::-webkit-resizer {
+  background-color:transparent;
+}
+
+/* touch control styles  */
+
+body {
+  /*overscroll-behavior: contain;*/
+  overscroll-behavior-y: none;
+  overscroll-behavior-x: none;
+
+  overflow: hidden;
+}
+
+.touch-control {
+}
+
+
+.touch-control .circle-button {
+  width: 60px;
+  height: 60px;
+  /*background-color: hsla(350, 100%, 90%, 0.6);*/
+  border: 1px solid hsla(350, 100%, 70%, 0.6);
+  border-radius: 50%;
+  position: absolute;
+}
+
+.touch-control .circle-button.turn {
+  bottom: 30px;
+  left: 280px;
+}
+
+.touch-control .circle-button.faster {
+  bottom: 30px;
+  right: 280px;
+}
+
+
+.touch-control .hand-button {
+  position: absolute;
+
+  width: 240px;
+  height: 240px;
+  border-radius: 50%;
+  /*background-color: hsla(0, 100%, 100%, 0.6);*/
+  border: 1px solid hsla(0, 100%, 80%, 0.4);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.touch-control .hand-center {
+  width: 60px;
+  height: 60px;
+  transform: rotate(45deg);
+  border: 1px solid hsla(0, 100%, 70%, 0.5);
+  pointer-events: none;
+}
+.touch-control .left-hand {
+  position: fixed;
+  left: 40px;
+  bottom: 60px;
+}
+.touch-control .right-hand {
+  position: fixed;
+  right: 40px;
+  bottom: 60px;
+}
+

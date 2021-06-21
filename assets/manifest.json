@@ -1,0 +1,16 @@
+{
+  "name": "Qua Debug",
+  "short_name": "Qua Debug",
+  "start_url": ".",
+  "display": "fullscreen",
+  "background_color": "#220011",
+  "description": "Debug entry for Quamolit",
+  "icons": [{
+    "src": "http://cdn.tiye.me/logo/quamolit.png",
+    "sizes": "400x400",
+    "type": "image/png"
+  }],
+  "related_applications": [{
+    "platform": "web"
+  }]
+}
