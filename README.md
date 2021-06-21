@@ -16,6 +16,12 @@ touch-control.core/render-control!
 
 ; "where you can get states"
 println touch-control.core/*control-states
+
+; create looper
+touch-control.core/start-control-loop! 300 $ fn (elapsed states)
+
+; clear loop on reload
+touch-control.core/clear-control-loop!
 ```
 
 States:

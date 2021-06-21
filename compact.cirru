@@ -2,11 +2,12 @@
 {} (:package |touch-control)
   :configs $ {} (:init-fn |touch-control.app.main/main!) (:reload-fn |touch-control.app.main/reload!)
     :modules $ []
-    :version |0.0.1
+    :version |0.0.2
   :files $ {}
     |touch-control.core $ {}
       :ns $ quote (ns touch-control.core)
       :defs $ {}
+        |*raq-loop $ quote (defatom *raq-loop nil)
         |render-control! $ quote
           defn render-control! ()
             if (some? @*container) (.!remove @*container)
@@ -52,6 +53,17 @@
               &doseq (child children) (render-dom! child div)
               .!appendChild parent div
         |%element $ quote (defrecord %element :props :events :children)
+        |start-control-loop! $ quote
+          defn start-control-loop! (duration f)
+            let
+                now $ js/performance.now
+                elapsed $ / (- now @*last-tick) 1000
+              f elapsed $ deref *control-states
+              reset! *last-tick now
+            reset! *timeout-loop $ js/setTimeout
+              fn () $ reset! *raq-loop
+                js/requestAnimationFrame $ fn (p) (start-control-loop! duration f)
+              , duration
         |connect-state $ quote
           defn connect-state (field)
             {}
@@ -60,6 +72,7 @@
                 if (not= js/window.innerHeight js/screen.height) (js/document.documentElement.requestFullscreen)
                 swap! *control-states assoc field false
         |*container $ quote (defatom *container nil)
+        |*timeout-loop $ quote (defatom *timeout-loop nil)
         |left-events $ quote
           def left-events $ {}
             :pointerdown $ fn (event)
@@ -98,28 +111,36 @@
                   move $ []
                     - (.-layerX event) 50
                     - 50 $ .-layerY event
+                js/console.log "\"moving to" move
                 swap! *control-states assoc :right-move move
+        |clear-control-loop! $ quote
+          defn clear-control-loop! () (js/clearTimeout @*timeout-loop) (js/cancelAnimationFrame @*raq-loop)
+        |*last-tick $ quote
+          defatom *last-tick $ js/performance.now
       :proc $ quote ()
       :configs $ {}
     |touch-control.app.main $ {}
       :ns $ quote
         ns touch-control.app.main $ :require (touch-control.app.config :as config)
-          touch-control.core :refer $ render-control! *control-states
+          touch-control.core :refer $ render-control! start-control-loop! clear-control-loop!
       :defs $ {}
         |main! $ quote
           defn main! () (load-console-formatter!)
             println "\"Running mode:" $ if config/dev? "\"dev" "\"release"
             render-control!
-            show-data!
-            add-watch *control-states :change $ fn (s old) (show-data!)
+            loop-show!
         |reload! $ quote
-          defn reload! () (println "\"reload TODO") (render-control!)
+          defn reload! () (println "\"reload TODO") (clear-control-loop!) (loop-show!) (render-control!)
         |mount-target $ quote
           def mount-target $ .querySelector js/document |.app
         |show-data! $ quote
-          defn show-data! () $ set!
-            .-innerText $ js/document.querySelector "\"pre"
-            js/JSON.stringify (to-js-data @*control-states) nil 2
+          defn show-data! (elapsed states) (println "\"showing" elapsed states)
+            set!
+              .-innerText $ js/document.querySelector "\"pre"
+              js/JSON.stringify (to-js-data states) nil 2
+        |loop-show! $ quote
+          defn loop-show! () $ start-control-loop! 300
+            fn (elapsed states) (show-data! elapsed states)
       :proc $ quote ()
     |touch-control.app.config $ {}
       :ns $ quote (ns touch-control.app.config)
