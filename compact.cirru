@@ -2,7 +2,7 @@
 {} (:package |touch-control)
   :configs $ {} (:init-fn |touch-control.app.main/main!) (:reload-fn |touch-control.app.main/reload!)
     :modules $ []
-    :version |0.0.2
+    :version |0.0.3
   :files $ {}
     |touch-control.core $ {}
       :ns $ quote (ns touch-control.core)
@@ -111,7 +111,7 @@
                   move $ []
                     - (.-layerX event) 50
                     - 50 $ .-layerY event
-                js/console.log "\"moving to" move
+                ; js/console.log "\"moving to" move
                 swap! *control-states assoc :right-move move
         |clear-control-loop! $ quote
           defn clear-control-loop! () (js/clearTimeout @*timeout-loop) (js/cancelAnimationFrame @*raq-loop)
@@ -132,9 +132,10 @@
         |reload! $ quote
           defn reload! () (println "\"reload TODO") (clear-control-loop!) (loop-show!) (render-control!)
         |mount-target $ quote
-          def mount-target $ .querySelector js/document |.app
+          def mount-target $ .!querySelector js/document |.app
         |show-data! $ quote
-          defn show-data! (elapsed states) (println "\"showing" elapsed states)
+          defn show-data! (elapsed states)
+            println "\"showing" elapsed (:left-move states) (:right-move states) (:left-a? states) (:right-a? states)
             set!
               .-innerText $ js/document.querySelector "\"pre"
               js/JSON.stringify (to-js-data states) nil 2

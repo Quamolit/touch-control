@@ -2,9 +2,9 @@
 /* touch control styles  */
 
 body {
-  /*overscroll-behavior: contain;*/
   overscroll-behavior-y: none;
   overscroll-behavior-x: none;
+  touch-action: none;
   overflow: hidden;
 }
 
