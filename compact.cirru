@@ -88,29 +88,29 @@
               :pointerup $ fn (event) (; js/console.log "\"up" event)
                 if (not= js/window.innerHeight js/screen.height) (js/document.documentElement.requestFullscreen)
                 swap! *control-states assoc field false
+        |zero $ quote
+          def zero $ [] 0 0
         |*container $ quote (defatom *container nil)
         |*timeout-loop $ quote (defatom *timeout-loop nil)
+        |*right-origin $ quote (defatom *right-origin zero)
         |left-events $ quote
           def left-events $ {}
             :pointerdown $ fn (event)
-              let
-                  move $ []
-                    - (.-layerX event) 50
-                    - 50 $ .-layerY event
-                swap! *control-states assoc :left-move move
-                swap! *prev-control-states assoc :left-move move
-            :pointerup $ fn (event)
-              swap! *control-states assoc :left-move $ [] 0 0
-              swap! *prev-control-states assoc :left-move $ [] 0 0
+              reset! *left-origin $ [] (.-layerX event) (.-layerY event)
+              swap! *control-states assoc :left-move zero
+              swap! *prev-control-states assoc :left-move zero
+            :pointerup $ fn (event) (swap! *control-states assoc :left-move zero) (swap! *prev-control-states assoc :left-move zero)
             :pointermove $ fn (event)
               let
                   move $ []
-                    - (.-layerX event) 50
-                    - 50 $ .-layerY event
+                    - (.-layerX event) (nth @*left-origin 0)
+                    - (nth @*left-origin 1) (.-layerY event)
                 swap! *control-states assoc :left-move move
         |div $ quote
           defn div (props events & children)
             %{} %element (:props props) (:events events) (:children children)
+        |*left-origin $ quote
+          defatom *left-origin $ [] 0 0
         |*control-states $ quote
           defatom *control-states $ {} (:left-a? false) (:left-b? false) (:right-a? false) (:right-b? false)
             :left-move $ [] 0 0
@@ -120,20 +120,15 @@
         |right-events $ quote
           def right-events $ {}
             :pointerdown $ fn (event)
-              let
-                  move $ []
-                    - (.-layerX event) 50
-                    - 50 $ .-layerY event
-                swap! *control-states assoc :right-move move
-                swap! *prev-control-states assoc :right-move move
-            :pointerup $ fn (event)
-              swap! *control-states assoc :right-move $ [] 0 0
-              swap! *prev-control-states assoc :right-move $ [] 0 0
+              reset! *right-origin $ [] (.-layerX event) (.-layerY event)
+              swap! *control-states assoc :right-move zero
+              swap! *prev-control-states assoc :right-move zero
+            :pointerup $ fn (event) (swap! *control-states assoc :right-move zero) (swap! *prev-control-states assoc :right-move zero)
             :pointermove $ fn (event)
               let
                   move $ []
-                    - (.-layerX event) 50
-                    - 50 $ .-layerY event
+                    - (.-layerX event) (nth @*right-origin 0)
+                    - (nth @*right-origin 1) (.-layerY event)
                 ; js/console.log "\"moving to" move
                 swap! *control-states assoc :right-move move
         |clear-control-loop! $ quote
