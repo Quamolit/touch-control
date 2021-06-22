@@ -18,7 +18,7 @@ touch-control.core/render-control!
 println touch-control.core/*control-states
 
 ; create looper
-touch-control.core/start-control-loop! 300 $ fn (elapsed states)
+touch-control.core/start-control-loop! 300 $ fn (elapsed states delta)
 
 ; clear loop on reload
 touch-control.core/clear-control-loop!
@@ -35,6 +35,13 @@ States:
 
 :right-a? false
 :right-b? false
+```
+
+Delta:
+
+```cirru
+:left-move $ [] 0 0
+:right-move $ [] 0 0
 ```
 
 To load styles:
