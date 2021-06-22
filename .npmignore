@@ -1,0 +1,13 @@
+
+.github/
+.gitattributes
+js-out/
+node_modules/
+.calcit-error.cirru
+.compact-inc.cirru
+assets/
+calcit.cirru
+main.js
+yarn.lock
+index.html
+dist/
