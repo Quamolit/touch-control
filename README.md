@@ -37,6 +37,16 @@ States:
 :right-b? false
 ```
 
+To load styles:
+
+```bash
+npm i @quamolit/touch-control
+```
+
+```css
+@import url("@quamolit/touch-control/style/touch-control.css");
+```
+
 ### Workflow
 
 https://github.com/calcit-lang/respo-calcit-workflow
