@@ -1,9 +1,9 @@
 {
-  "version": "0.0.1",
-  "dependencies": {
-    "@calcit/procs": "^0.4.0-a13"
-  },
+  "name": "@quamolit/touch-control",
+  "version": "0.0.3",
+  "dependencies": {},
   "devDependencies": {
+    "@calcit/procs": "^0.4.0-a13",
     "vite": "^2.3.8"
   }
 }

@@ -1,10 +1,9 @@
 
-@import url("./touch-control.css");
+@import url("../style/touch-control.css");
 
 body {
   margin: 0;
   overscroll-behavior-y: none;
-  touch-action: none;
   padding: 40px;
   color:  gray;
 
