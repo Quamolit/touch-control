@@ -2,7 +2,7 @@
 {} (:package |touch-control)
   :configs $ {} (:init-fn |touch-control.app.main/main!) (:reload-fn |touch-control.app.main/reload!)
     :modules $ []
-    :version |0.0.3
+    :version |0.0.4
   :files $ {}
     |touch-control.core $ {}
       :ns $ quote (ns touch-control.core)
@@ -52,14 +52,31 @@
                 let[] (k v) pair $ .!addEventListener div (turn-string k) v false
               &doseq (child children) (render-dom! child div)
               .!appendChild parent div
+        |*prev-control-states $ quote
+          defatom *prev-control-states $ {}
+            :left-move $ [] 0 0
+            :right-move $ [] 0 0
+        |&c- $ quote
+          defn &c- (a b)
+            let-sugar
+                  [] x1 y1
+                  , a
+                ([] x2 y2) b
+              [] (- x1 x2) (- y1 y2)
         |%element $ quote (defrecord %element :props :events :children)
         |start-control-loop! $ quote
           defn start-control-loop! (duration f)
             let
                 now $ js/performance.now
                 elapsed $ / (- now @*last-tick) 1000
-              f elapsed $ deref *control-states
+                states $ deref *control-states
+              f elapsed states $ {}
+                :left-move $ &c- (:left-move states) (:left-move @*prev-control-states)
+                :right-move $ &c- (:right-move states) (:right-move @*prev-control-states)
               reset! *last-tick now
+              reset! *prev-control-states $ {}
+                :left-move $ :left-move states
+                :right-move $ :right-move states
             reset! *timeout-loop $ js/setTimeout
               fn () $ reset! *raq-loop
                 js/requestAnimationFrame $ fn (p) (start-control-loop! duration f)
@@ -71,46 +88,47 @@
               :pointerup $ fn (event) (; js/console.log "\"up" event)
                 if (not= js/window.innerHeight js/screen.height) (js/document.documentElement.requestFullscreen)
                 swap! *control-states assoc field false
+        |zero $ quote
+          def zero $ [] 0 0
         |*container $ quote (defatom *container nil)
         |*timeout-loop $ quote (defatom *timeout-loop nil)
+        |*right-origin $ quote (defatom *right-origin zero)
         |left-events $ quote
           def left-events $ {}
             :pointerdown $ fn (event)
-              let
-                  move $ []
-                    - (.-layerX event) 50
-                    - 50 $ .-layerY event
-                swap! *control-states assoc :left-move move
-            :pointerup $ fn (event)
-              swap! *control-states assoc :left-move $ [] 0 0
+              reset! *left-origin $ [] (.-layerX event) (.-layerY event)
+              swap! *control-states assoc :left-move zero
+              swap! *prev-control-states assoc :left-move zero
+            :pointerup $ fn (event) (swap! *control-states assoc :left-move zero) (swap! *prev-control-states assoc :left-move zero)
             :pointermove $ fn (event)
               let
                   move $ []
-                    - (.-layerX event) 50
-                    - 50 $ .-layerY event
+                    - (.-layerX event) (nth @*left-origin 0)
+                    - (nth @*left-origin 1) (.-layerY event)
                 swap! *control-states assoc :left-move move
         |div $ quote
           defn div (props events & children)
             %{} %element (:props props) (:events events) (:children children)
+        |*left-origin $ quote
+          defatom *left-origin $ [] 0 0
         |*control-states $ quote
           defatom *control-states $ {} (:left-a? false) (:left-b? false) (:right-a? false) (:right-b? false)
             :left-move $ [] 0 0
+            :left-prev $ [] 0 0
             :right-move $ [] 0 0
+            :right-prev $ []
         |right-events $ quote
           def right-events $ {}
             :pointerdown $ fn (event)
-              let
-                  move $ []
-                    - (.-layerX event) 50
-                    - 50 $ .-layerY event
-                swap! *control-states assoc :right-move move
-            :pointerup $ fn (event)
-              swap! *control-states assoc :right-move $ [] 0 0
+              reset! *right-origin $ [] (.-layerX event) (.-layerY event)
+              swap! *control-states assoc :right-move zero
+              swap! *prev-control-states assoc :right-move zero
+            :pointerup $ fn (event) (swap! *control-states assoc :right-move zero) (swap! *prev-control-states assoc :right-move zero)
             :pointermove $ fn (event)
               let
                   move $ []
-                    - (.-layerX event) 50
-                    - 50 $ .-layerY event
+                    - (.-layerX event) (nth @*right-origin 0)
+                    - (nth @*right-origin 1) (.-layerY event)
                 ; js/console.log "\"moving to" move
                 swap! *control-states assoc :right-move move
         |clear-control-loop! $ quote
@@ -134,14 +152,16 @@
         |mount-target $ quote
           def mount-target $ .!querySelector js/document |.app
         |show-data! $ quote
-          defn show-data! (elapsed states)
+          defn show-data! (elapsed states delta)
             println "\"showing" elapsed (:left-move states) (:right-move states) (:left-a? states) (:right-a? states)
             set!
               .-innerText $ js/document.querySelector "\"pre"
-              js/JSON.stringify (to-js-data states) nil 2
+              js/JSON.stringify
+                to-js-data $ {} (:states states) (:delta delta)
+                , nil 2
         |loop-show! $ quote
           defn loop-show! () $ start-control-loop! 300
-            fn (elapsed states) (show-data! elapsed states)
+            fn (elapsed states delta) (show-data! elapsed states delta)
       :proc $ quote ()
     |touch-control.app.config $ {}
       :ns $ quote (ns touch-control.app.config)
