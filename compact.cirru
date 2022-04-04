@@ -2,7 +2,8 @@
 {} (:package |touch-control)
   :configs $ {} (:init-fn |touch-control.app.main/main!) (:reload-fn |touch-control.app.main/reload!)
     :modules $ []
-    :version |0.0.6
+    :version |0.0.7
+  :entries $ {}
   :files $ {}
     |touch-control.app.config $ {}
       :ns $ quote (ns touch-control.app.config)
@@ -13,7 +14,9 @@
     |touch-control.app.main $ {}
       :ns $ quote
         ns touch-control.app.main $ :require (touch-control.app.config :as config)
-          touch-control.core :refer $ render-control! start-control-loop! clear-control-loop!
+          touch-control.core :refer $ render-control! start-control-loop! clear-control-loop! replace-control-loop!
+          "\"./calcit.build-errors" :default build-errors
+          "\"bottom-tip" :default hud!
       :defs $ {}
         |mount-target $ quote
           def mount-target $ .!querySelector js/document |.app
@@ -21,10 +24,7 @@
           defn main! () (load-console-formatter!)
             println "\"Running mode:" $ if config/dev? "\"dev" "\"release"
             render-control!
-            loop-show!
-        |loop-show! $ quote
-          defn loop-show! () $ start-control-loop! 300
-            fn (elapsed states delta) (show-data! elapsed states delta)
+            start-control-loop! 300 $ fn (elapsed states delta) (show-data! elapsed states delta)
         |show-data! $ quote
           defn show-data! (elapsed states delta)
             println "\"showing" elapsed (:left-move states) (:right-move states) (:left-a? states) (:right-a? states)
@@ -34,7 +34,12 @@
                 to-js-data $ {} (:states states) (:delta delta)
                 , nil 2
         |reload! $ quote
-          defn reload! () (println "\"reload TODO") (clear-control-loop!) (loop-show!) (render-control!)
+          defn reload! () $ if (nil? build-errors)
+            do
+              replace-control-loop! 300 $ fn (elapsed states delta) (show-data! elapsed states delta)
+              render-control!
+              hud! "\"ok~" "\"Ok"
+            hud! "\"error" build-errors
     |touch-control.core $ {}
       :ns $ quote (ns touch-control.core)
       :defs $ {}
@@ -57,7 +62,7 @@
             let
                 div $ js/document.createElement "\"div"
                 props $ :props el
-                events $ :events el
+                events $ or (:events el) ({})
                 children $ :children el
               &doseq (pair props)
                 let[] (k v) pair $ aset div (turn-string k) v
@@ -90,6 +95,8 @@
               :pointerup $ fn (event) (; js/console.log "\"up" event)
                 if (not= js/window.innerHeight js/screen.height) (js/document.documentElement.requestFullscreen)
                 swap! *control-states assoc field false
+        |replace-control-loop! $ quote
+          defn replace-control-loop! (duration f) (clear-control-loop!) (start-control-loop! duration f)
         |&c- $ quote
           defn &c- (a b)
             let-sugar
