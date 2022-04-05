@@ -22,6 +22,9 @@ touch-control.core/start-control-loop! 300 $ fn (elapsed states delta)
 
 ; clear loop on reload
 touch-control.core/clear-control-loop!
+
+; alias of clearing and createing
+touch-control.core/replace-control-loop! 300 $ fn (elapsed states delta)
 ```
 
 States:
