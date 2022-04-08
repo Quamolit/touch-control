@@ -2,7 +2,7 @@
 {} (:package |touch-control)
   :configs $ {} (:init-fn |touch-control.app.main/main!) (:reload-fn |touch-control.app.main/reload!)
     :modules $ []
-    :version |0.0.7
+    :version |0.0.8
   :entries $ {}
   :files $ {}
     |touch-control.app.config $ {}
@@ -30,9 +30,7 @@
             println "\"showing" elapsed (:left-move states) (:right-move states) (:left-a? states) (:right-a? states)
             set!
               .-innerText $ js/document.querySelector "\"pre"
-              js/JSON.stringify
-                to-js-data $ {} (:states states) (:delta delta)
-                , nil 2
+              format-cirru-edn $ {} (:states states) (:delta delta)
         |reload! $ quote
           defn reload! () $ if (nil? build-errors)
             do
@@ -84,6 +82,9 @@
               reset! *prev-control-states $ {}
                 :left-move $ :left-move states
                 :right-move $ :right-move states
+              if
+                and (:left-a? states) (:right-a? states)
+                try-fullscreen!
             reset! *timeout-loop $ js/setTimeout
               fn () $ reset! *raq-loop
                 js/requestAnimationFrame $ fn (p) (start-control-loop! duration f)
@@ -92,9 +93,7 @@
           defn connect-state (field)
             {}
               :pointerdown $ fn (event) (; js/console.log "\"down" event) (swap! *control-states assoc field true)
-              :pointerup $ fn (event) (; js/console.log "\"up" event)
-                if (not= js/window.innerHeight js/screen.height) (js/document.documentElement.requestFullscreen)
-                swap! *control-states assoc field false
+              :pointerup $ fn (event) (; js/console.log "\"up" event) (swap! *control-states assoc field false)
         |replace-control-loop! $ quote
           defn replace-control-loop! (duration f) (clear-control-loop!) (start-control-loop! duration f)
         |&c- $ quote
@@ -146,6 +145,8 @@
                       connect-state :right-b?
                 dom $ render-dom! panel js/document.body
               reset! *container dom
+        |try-fullscreen! $ quote
+          defn try-fullscreen! () $ if (not= js/window.innerHeight js/screen.height) (js/document.documentElement.requestFullscreen)
         |*control-states $ quote
           defatom *control-states $ {} (:left-a? false) (:left-b? false) (:right-a? false) (:right-b? false)
             :left-move $ [] 0 0
@@ -159,18 +160,21 @@
         |clear-control-loop! $ quote
           defn clear-control-loop! () (js/clearTimeout @*timeout-loop) (js/cancelAnimationFrame @*raq-loop)
         |left-events $ quote
-          def left-events $ {}
-            :pointerdown $ fn (event)
-              reset! *left-origin $ [] (.-layerX event) (.-layerY event)
-              swap! *control-states assoc :left-move zero
-              swap! *prev-control-states assoc :left-move zero
-            :pointerup $ fn (event) (swap! *control-states assoc :left-move zero) (swap! *prev-control-states assoc :left-move zero)
-            :pointermove $ fn (event)
-              let
-                  move $ []
-                    - (.-layerX event) (nth @*left-origin 0)
-                    - (nth @*left-origin 1) (.-layerY event)
-                swap! *control-states assoc :left-move move
+          def left-events $ let
+              on-leave $ fn (event) (swap! *control-states assoc :left-move zero) (swap! *prev-control-states assoc :left-move zero)
+            {}
+              :pointerdown $ fn (event)
+                reset! *left-origin $ [] (.-layerX event) (.-layerY event)
+                swap! *control-states assoc :left-move zero
+                swap! *prev-control-states assoc :left-move zero
+              :mouseleave on-leave
+              :pointerup on-leave
+              :pointermove $ fn (event)
+                let
+                    move $ []
+                      - (.-layerX event) (nth @*left-origin 0)
+                      - (nth @*left-origin 1) (.-layerY event)
+                  swap! *control-states assoc :left-move move
         |*prev-control-states $ quote
           defatom *prev-control-states $ {}
             :left-move $ [] 0 0

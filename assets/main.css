@@ -17,6 +17,7 @@ body * {
 
 pre {
   color:  gray;
+  line-height: 18px;
 }
 
 ::-webkit-scrollbar {
