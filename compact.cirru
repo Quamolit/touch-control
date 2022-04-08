@@ -2,7 +2,7 @@
 {} (:package |touch-control)
   :configs $ {} (:init-fn |touch-control.app.main/main!) (:reload-fn |touch-control.app.main/reload!)
     :modules $ []
-    :version |0.0.8
+    :version |0.0.9
   :entries $ {}
   :files $ {}
     |touch-control.app.config $ {}
@@ -42,19 +42,20 @@
       :ns $ quote (ns touch-control.core)
       :defs $ {}
         |right-events $ quote
-          def right-events $ {}
-            :pointerdown $ fn (event)
-              reset! *right-origin $ [] (.-layerX event) (.-layerY event)
-              swap! *control-states assoc :right-move zero
-              swap! *prev-control-states assoc :right-move zero
-            :pointerup $ fn (event) (swap! *control-states assoc :right-move zero) (swap! *prev-control-states assoc :right-move zero)
-            :pointermove $ fn (event)
-              let
-                  move $ []
-                    - (.-layerX event) (nth @*right-origin 0)
-                    - (nth @*right-origin 1) (.-layerY event)
-                ; js/console.log "\"moving to" move
-                swap! *control-states assoc :right-move move
+          def right-events $ let
+              on-enter $ fn (event)
+                reset! *right-origin $ [] (.-layerX event) (.-layerY event)
+                swap! *control-states assoc :right-move zero
+                swap! *prev-control-states assoc :right-move zero
+              on-leave $ fn (event) (swap! *control-states assoc :right-move zero) (swap! *prev-control-states assoc :right-move zero)
+            {} (:pointerdown on-enter) (:pointerup on-leave) (:mouseenter on-enter) (:mouseleave on-leave)
+              :pointermove $ fn (event)
+                let
+                    move $ []
+                      - (.-layerX event) (nth @*right-origin 0)
+                      - (nth @*right-origin 1) (.-layerY event)
+                  ; js/console.log "\"moving to" move
+                  swap! *control-states assoc :right-move move
         |render-dom! $ quote
           defn render-dom! (el parent)
             let
@@ -162,13 +163,11 @@
         |left-events $ quote
           def left-events $ let
               on-leave $ fn (event) (swap! *control-states assoc :left-move zero) (swap! *prev-control-states assoc :left-move zero)
-            {}
-              :pointerdown $ fn (event)
+              on-enter $ fn (event)
                 reset! *left-origin $ [] (.-layerX event) (.-layerY event)
                 swap! *control-states assoc :left-move zero
                 swap! *prev-control-states assoc :left-move zero
-              :mouseleave on-leave
-              :pointerup on-leave
+            {} (:pointerdown on-enter) (:pointerenter on-enter) (:mouseleave on-leave) (:pointerup on-leave)
               :pointermove $ fn (event)
                 let
                     move $ []
