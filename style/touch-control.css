@@ -15,12 +15,12 @@ body {
 .left-group {
   position: fixed;
   left: 24px;
-  top: 300px;
+  bottom: 360px;
 }
 .right-group {
   position: fixed;
   right: 24px;
-  top: 300px;
+  bottom: 360px;
 }
 
 .touch-control .circle-button {
@@ -35,20 +35,20 @@ body {
 
 .touch-control .circle-button.left-a {
   bottom: 100px;
-  left: 20px;
+  left: 8px;
 }
 .touch-control .circle-button.left-b {
-  bottom: 0px;
-  left: 0px;
+  bottom: 20px;
+  left: 8px;
 }
 
 .touch-control .circle-button.right-a {
   bottom: 100px;
-  right: 20px;
+  right: 8px;
 }
 .touch-control .circle-button.right-b {
-  bottom: 0px;
-  right: 0px;
+  bottom: 20px;
+  right: 8px;
 }
 
 
@@ -75,12 +75,12 @@ body {
   border-radius: 4px;
 }
 .touch-control .left-hand {
-  left: 40px;
-  bottom: -200px;
+  left: 104px;
+  bottom: -160px;
 }
 .touch-control .right-hand {
-  right: 40px;
-  bottom: -200px;
+  right: 104px;
+  bottom: -160px;
 }
 
 .left-hand .hand-center {
