@@ -1,6 +1,6 @@
 
 {} (:package |touch-control)
-  :configs $ {} (:init-fn |touch-control.app.main/main!) (:reload-fn |touch-control.app.main/reload!) (:version |0.0.10)
+  :configs $ {} (:init-fn |touch-control.app.main/main!) (:reload-fn |touch-control.app.main/reload!) (:version |0.0.12)
     :modules $ []
   :entries $ {}
   :files $ {}
@@ -64,6 +64,19 @@
             :right-move $ [] 0 0
         |*raq-loop $ quote (defatom *raq-loop nil)
         |*right-origin $ quote (defatom *right-origin zero)
+        |*shift-listener $ quote
+          defatom *shift-listener $ do
+            js/window.addEventListener "\"keydown" $ fn (event)
+              if
+                and (.-shiftKey event) (not @*shift-listener)
+                reset! *shift-listener true
+            js/window.addEventListener "\"keyup" $ fn (event)
+              if
+                and
+                  not $ .-shiftKey event
+                  , @*shift-listener
+                reset! *shift-listener false
+            , false
         |*timeout-loop $ quote (defatom *timeout-loop nil)
         |clear-control-loop! $ quote
           defn clear-control-loop! () (js/clearTimeout @*timeout-loop) (js/cancelAnimationFrame @*raq-loop)
@@ -161,10 +174,12 @@
             let
                 now $ js/performance.now
                 elapsed $ / (- now @*last-tick) 1000
+                shift? @*shift-listener
                 states $ deref *control-states
-              f elapsed states $ {}
-                :left-move $ &c- (:left-move states) (:left-move @*prev-control-states)
-                :right-move $ &c- (:right-move states) (:right-move @*prev-control-states)
+              f elapsed (assoc states :shift? shift?)
+                {}
+                  :left-move $ &c- (:left-move states) (:left-move @*prev-control-states)
+                  :right-move $ &c- (:right-move states) (:right-move @*prev-control-states)
               reset! *last-tick now
               reset! *prev-control-states $ {}
                 :left-move $ :left-move states

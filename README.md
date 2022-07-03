@@ -38,6 +38,8 @@ States:
 
 :right-a? false
 :right-b? false
+
+:shift? false
 ```
 
 Delta:
