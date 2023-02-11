@@ -1,6 +1,6 @@
 
 {} (:package |touch-control)
-  :configs $ {} (:init-fn |touch-control.app.main/main!) (:reload-fn |touch-control.app.main/reload!) (:version |0.0.12)
+  :configs $ {} (:init-fn |touch-control.app.main/main!) (:reload-fn |touch-control.app.main/reload!) (:version |0.0.13)
     :modules $ []
   :entries $ {}
   :files $ {}
