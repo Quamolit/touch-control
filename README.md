@@ -2,9 +2,9 @@
 Touch Control
 ----
 
-> for Quatrefoil [calcit-js](https://github.com/calcit-lang/calcit_runner.rs). This lib targets Chrome mobile.
+> for Quatrefoil [calcit-js](https://github.com/calcit-lang/calcit). This lib targets Chrome mobile.
 
-Demo http://repo.quamolit.org/touch-control/ .
+Demo http://r.tiye.me/Quatrefoil-GL/touch-control/ .
 
 ### Usages
 

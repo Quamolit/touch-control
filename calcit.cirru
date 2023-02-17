@@ -1,6 +1,6 @@
 
 {}
-  :configs $ {} (:compact-output? true) (:extension |.cljs) (:init-fn |touch-control.app.main/main!) (:output |src) (:port 6001) (:reload-fn |touch-control.app.main/reload!) (:storage-key |calcit.cirru) (:version |0.0.12)
+  :configs $ {} (:compact-output? true) (:extension |.cljs) (:init-fn |touch-control.app.main/main!) (:output |src) (:port 6001) (:reload-fn |touch-control.app.main/reload!) (:storage-key |calcit.cirru) (:version |0.0.13)
     :modules $ []
   :entries $ {}
   :ir $ {} (:package |touch-control)

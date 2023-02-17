@@ -7,6 +7,7 @@ node_modules/
 .compact-inc.cirru
 assets/
 calcit.cirru
+compact.cirru
 main.mjs
 yarn.lock
 index.html
