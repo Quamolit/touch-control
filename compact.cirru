@@ -1,10 +1,10 @@
 
 {} (:package |touch-control)
-  :configs $ {} (:init-fn |touch-control.app.main/main!) (:reload-fn |touch-control.app.main/reload!) (:version |0.0.14)
+  :configs $ {} (:init-fn |touch-control.app.main/main!) (:reload-fn |touch-control.app.main/reload!) (:version |0.0.15)
     :modules $ []
   :entries $ {}
   :files $ {}
-    |touch-control.app.config $ {}
+    |touch-control.app.config $ %{} :FileEntry
       :defs $ {}
         |dev? $ %{} :CodeEntry (:doc |)
           :code $ quote (def dev? true)
@@ -13,7 +13,7 @@
             def site $ {} (:dev-ui "\"http://localhost:8100/main-fonts.css") (:release-ui "\"http://cdn.tiye.me/favored-fonts/main-fonts.css") (:cdn-url "\"http://cdn.tiye.me/calcit-workflow/") (:title "\"Calcit") (:icon "\"http://cdn.tiye.me/logo/mvc-works.png") (:storage-key "\"workflow")
       :ns $ %{} :CodeEntry (:doc |)
         :code $ quote (ns touch-control.app.config)
-    |touch-control.app.main $ {}
+    |touch-control.app.main $ %{} :FileEntry
       :defs $ {}
         |main! $ %{} :CodeEntry (:doc |)
           :code $ quote
@@ -45,7 +45,7 @@
             touch-control.core :refer $ render-control! start-control-loop! clear-control-loop! replace-control-loop!
             "\"./calcit.build-errors" :default build-errors
             "\"bottom-tip" :default hud!
-    |touch-control.core $ {}
+    |touch-control.core $ %{} :FileEntry
       :defs $ {}
         |%element $ %{} :CodeEntry (:doc |)
           :code $ quote (defrecord %element :props :events :children)

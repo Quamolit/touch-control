@@ -1,10 +1,10 @@
 
 {} (:package |touch-control)
-  :configs $ {} (:init-fn |touch-control.app.main/main!) (:output |src) (:port 6001) (:reload-fn |touch-control.app.main/reload!) (:storage-key |calcit.cirru) (:version |0.0.14)
+  :configs $ {} (:init-fn |touch-control.app.main/main!) (:output |src) (:port 6001) (:reload-fn |touch-control.app.main/reload!) (:storage-key |calcit.cirru) (:version |0.0.15)
     :modules $ []
   :entries $ {}
   :files $ {}
-    |touch-control.app.config $ {}
+    |touch-control.app.config $ %{} :FileEntry
       :defs $ {}
         |dev? $ %{} :CodeEntry (:doc |)
           :code $ %{} :Expr (:at 1544873875614) (:by |rJG4IHzWf)
@@ -49,7 +49,7 @@
           :data $ {}
             |T $ %{} :Leaf (:at 1527788237503) (:by |root) (:text |ns)
             |j $ %{} :Leaf (:at 1527788237503) (:by |root) (:text |touch-control.app.config)
-    |touch-control.app.main $ {}
+    |touch-control.app.main $ %{} :FileEntry
       :defs $ {}
         |main! $ %{} :CodeEntry (:doc |)
           :code $ %{} :Expr (:at 1499755354983) (:by nil)
@@ -238,8 +238,7 @@
                     |T $ %{} :Leaf (:at 1649047021319) (:by |rJG4IHzWf) (:text "|\"bottom-tip")
                     |b $ %{} :Leaf (:at 1649047021319) (:by |rJG4IHzWf) (:text |:default)
                     |h $ %{} :Leaf (:at 1649047021319) (:by |rJG4IHzWf) (:text |hud!)
-    |touch-control.core $ {}
-      :configs $ {}
+    |touch-control.core $ %{} :FileEntry
       :defs $ {}
         |%element $ %{} :CodeEntry (:doc |)
           :code $ %{} :Expr (:at 1624254852484) (:by |rJG4IHzWf)
