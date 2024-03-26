@@ -3,8 +3,8 @@
   "version": "0.0.15",
   "dependencies": {},
   "devDependencies": {
-    "@calcit/procs": "^0.8.0-a3",
+    "@calcit/procs": "^0.8.45",
     "bottom-tip": "^0.1.5",
-    "vite": "^4.4.9"
+    "vite": "^5.2.6"
   }
 }
